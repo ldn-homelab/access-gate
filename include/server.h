@@ -1,5 +1,12 @@
 #pragma once
 
+/* server definition  */
+#define GATE_PORT 4000
+
+/* client definition */
+#define IP_ADDRESS_SIZE 64
+#define HOST_SIZE 256
+
 
 /* 1 ----- set up the access-gate server ----- */
 int access_gate_set(void);
