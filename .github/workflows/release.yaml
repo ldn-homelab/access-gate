@@ -1,0 +1,50 @@
+# workflow name
+name: Access-Gate Release
+
+# triggers
+on:
+  push:
+    tags:
+      - 'v*.*'
+
+
+# jobs
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # get source code
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # Extract image metadata
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }} 
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+
+      # authenticate with GHCR
+      - name: Authenticate with GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # build and push Container image
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Containerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
